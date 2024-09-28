@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        /* Base Options: */
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "target": "ESNext",
+        "allowJs": true,
+        "resolveJsonModule": true,
+        "moduleDetection": "auto",
+        "isolatedModules": true,
+        "verbatimModuleSyntax": true,
+        "moduleResolution": "Node",
+
+        /* Strictness */
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+
+        "module": "ESNext",
+        "lib": ["ESNext"],
+
+        "types": ["vitest", "node", "vite/client"]
+    }
+}
