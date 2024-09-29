@@ -101,4 +101,14 @@ describe("generateChangelog", () => {
 
         expect(got).toMatchInlineSnapshot(`"${want.default.trim()}"`)
     })
+
+    it("throws if no commits are provided", () => {
+        expect(() =>
+            generateChangelog([], {
+                commits: [],
+                tag: "1.0.0",
+                date: "0000-00-00",
+            }),
+        ).toThrowError(new Error("No commits found"))
+    })
 })
