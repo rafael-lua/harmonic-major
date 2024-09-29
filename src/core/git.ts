@@ -1,9 +1,10 @@
 /**
- * All credits to: https://github.com/unjs/changelogen/blob/main/src/git.ts#L58
+ * For getDiff and parse, all credits are to https://github.com/unjs/changelogen/blob/main/src/git.ts#L58
  * I only desconstructed to what I needed.
  */
 
 import { execa } from "execa"
+import semver from "semver"
 
 type GitCommitAuthor = {
     name: string
@@ -90,4 +91,16 @@ export const getGitDiff = async (
 
             return r
         })
+}
+
+export const createReleaseTag = (
+    version: string,
+    message: string,
+    hash: string = "HEAD",
+) => {
+    const validVersion = semver.valid(version)
+
+    if (validVersion === null) throw new Error("Invalid tag semver version")
+
+    return execa("git", ["tag", "-a", `v${validVersion}`, "-m", message, hash])
 }

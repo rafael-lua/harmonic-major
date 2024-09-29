@@ -4,9 +4,9 @@ import { execaSync } from "execa"
 import fs from "fs"
 import os from "os"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { getGitDiff, parseCommits } from "../src/core/git"
+import { createReleaseTag, getGitDiff, parseCommits } from "../src/core/git"
 
-const setupTempGitRepository = () => {
+const setupTempGitRepository = async (fn: () => void | Promise<void>) => {
     const tempDir = fs.mkdtempSync(join(os.tmpdir(), "git-test-"))
     process.chdir(tempDir)
 
@@ -14,6 +14,12 @@ const setupTempGitRepository = () => {
     execaSync`git config user.email ${"test@example.com"}`
     execaSync`git config user.name ${"Test User"}`
 
+    await fn()
+
+    return tempDir
+}
+
+const defaultGitCommands = () => {
     const README_FILE = "README.md"
 
     fs.writeFileSync(README_FILE, "# Test")
@@ -31,17 +37,15 @@ const setupTempGitRepository = () => {
     fs.appendFileSync(README_FILE, "\n\nBREAKING and scope")
     execaSync`git add ${README_FILE}`
     execaSync`git commit -m ${"fix!: THIS BREAKS EVERYTHING"}`
-
-    return tempDir
 }
 
 const shortHashRegex = /^[a-f0-9]{7}$/
 
-describe("git tests", () => {
+describe("commit tests", () => {
     let tempRepoPath: string = ""
 
-    beforeAll(() => {
-        tempRepoPath = setupTempGitRepository()
+    beforeAll(async () => {
+        tempRepoPath = await setupTempGitRepository(defaultGitCommands)
     })
 
     afterAll(() => {
@@ -146,5 +150,107 @@ describe("git tests", () => {
                 },
             ])
         })
+    })
+})
+
+describe("tag tests", () => {
+    let tempRepoPath: string = ""
+
+    beforeAll(async () => {
+        tempRepoPath = await setupTempGitRepository(() => {
+            const README_FILE = "README.md"
+
+            fs.writeFileSync(README_FILE, "# Test")
+            execaSync`git add ${README_FILE}`
+            execaSync`git commit -m ${"Initial commit"}`
+        })
+    })
+
+    afterAll(() => {
+        // Clean up the temporary directory
+        fs.rmSync(tempRepoPath, { recursive: true, force: true })
+    })
+
+    it("should create the expected releases", async () => {
+        const releaseCommand = await createReleaseTag(
+            "v0.0.0",
+            "Initial commit",
+        )
+
+        expect(releaseCommand.failed).toEqual(false)
+
+        const { stdout: headSha } = execaSync`git rev-parse HEAD`
+        const { stdout: tagSha } = execaSync`git rev-list -n 1 v0.0.0`
+
+        expect(tagSha).toEqual(headSha)
+    })
+})
+
+describe("diff tag tests", () => {
+    let tempRepoPath: string = ""
+
+    beforeAll(async () => {
+        tempRepoPath = await setupTempGitRepository(async () => {
+            const README_FILE = "README.md"
+
+            fs.writeFileSync(README_FILE, "# Test")
+            execaSync`git add ${README_FILE}`
+            execaSync`git commit -m ${"Initial commit"}`
+
+            await createReleaseTag("v0.0.0", "Initial commit")
+
+            fs.appendFileSync(README_FILE, "\n\nBREAKING")
+            execaSync`git add ${README_FILE}`
+            execaSync`git commit -m ${"fix!: THIS BREAKS EVERYTHING"}`
+
+            await createReleaseTag("v1.0.0", "fix: BREAKING")
+
+            fs.appendFileSync(README_FILE, "\n\nNew major!")
+            execaSync`git add ${README_FILE}`
+            execaSync`git commit -m ${"feat!: major"}`
+
+            await createReleaseTag("v2.0.0", "feat: Major")
+        })
+    })
+
+    afterAll(() => {
+        // Clean up the temporary directory
+        fs.rmSync(tempRepoPath, { recursive: true, force: true })
+    })
+
+    it("should return the expected range diff (from TAG to HEAD)", async () => {
+        const got = await getGitDiff("v0.0.0")
+
+        const want = [
+            {
+                message: "feat!: major",
+                shortHash: expect.stringMatching(shortHashRegex),
+                author: { name: "Test User", email: "test@example.com" },
+                body: "",
+            },
+            {
+                message: "fix!: THIS BREAKS EVERYTHING",
+                shortHash: expect.stringMatching(shortHashRegex),
+                author: { name: "Test User", email: "test@example.com" },
+                body: "",
+            },
+        ]
+
+        expect(want).toEqual(got)
+    })
+
+    it("should return the expected range diff (from TAG to TAG)", async () => {
+        const got = await getGitDiff("v0.0.0", "v1.0.0")
+
+        const want = [
+            {
+                message: "fix!: THIS BREAKS EVERYTHING",
+                shortHash: expect.stringMatching(shortHashRegex),
+                author: { name: "Test User", email: "test@example.com" },
+                body: "",
+            },
+        ]
+
+        expect(want).toEqual(got)
     })
 })
