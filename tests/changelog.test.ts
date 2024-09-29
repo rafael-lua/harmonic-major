@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { generateChangelog, parseChangelog } from "../src/core/changelog"
+import {
+    assembleChangelog,
+    generateChangelog,
+    parseChangelog,
+} from "../src/core/changelog"
 import type { GitCommit } from "../src/core/git"
 
 describe("parseChangelog", () => {
@@ -95,11 +99,13 @@ describe("generateChangelog", () => {
             date: "0000-00-00",
         })
 
-        expect(got).toContain("## [1.0.0](...) (0000-00-00)")
+        const [header, ...releases] =
+            currentChangelogFixture.default.split("\n")
 
-        const want = await import("./fixtures/changelog-two-releases.md?raw")
-
-        expect(got).toMatchInlineSnapshot(`"${want.default.trim()}"`)
+        expect(got.header).toContain(header)
+        expect(got.newRelease).toContain("## [1.0.0](...) (0000-00-00)")
+        expect(got.releases).toHaveLength(1)
+        expect(releases.join("\n").trim()).toEqual(got.releases[0])
     })
 
     it("throws if no commits are provided", () => {
@@ -110,5 +116,42 @@ describe("generateChangelog", () => {
                 date: "0000-00-00",
             }),
         ).toThrowError(new Error("No commits found"))
+    })
+})
+
+describe("assembleChangelog", () => {
+    it("should assemble a new changelog from provided commits", async () => {
+        const currentChangelogFixture = await import(
+            "./fixtures/changelog-basic.md?raw"
+        )
+
+        const currentChangelog = parseChangelog(currentChangelogFixture.default)
+
+        const commits: GitCommit[] = [
+            // Feats
+            makeCommit("feat(scope): another feature message"),
+            makeCommit("feat: feature scopeless"),
+            // Fixes
+            makeCommit("fix(scope)!: breaking fix"),
+            makeCommit("fix: random fix"),
+            // Chores
+            makeCommit("chore(scope): daily chores"),
+            makeCommit("refactor(scope): a little less messy"),
+            makeCommit("docs(scope): how does this work"),
+            // Tests
+            makeCommit("test(scope): hopefully doesnt break"),
+        ]
+
+        const changelog = generateChangelog(currentChangelog, {
+            commits,
+            tag: "1.0.0",
+            date: "0000-00-00",
+        })
+
+        const got = assembleChangelog({ ...changelog })
+
+        const want = await import("./fixtures/changelog-two-releases.md?raw")
+
+        expect(got).toMatchInlineSnapshot(`"${want.default.trim()}"`)
     })
 })

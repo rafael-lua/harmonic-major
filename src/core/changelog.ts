@@ -112,5 +112,17 @@ export const generateChangelog = (
     // Remove trailling line break
     newRelease = newRelease.slice(0, -1)
 
+    return { header, newRelease, releases: [...releases] }
+}
+
+export const assembleChangelog = ({
+    header,
+    newRelease,
+    releases,
+}: {
+    header?: string
+    newRelease: string
+    releases: string[]
+}) => {
     return [header, newRelease, ...releases].join("\n")
 }
