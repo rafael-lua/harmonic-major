@@ -4,7 +4,7 @@ import { execaSync } from "execa"
 import fs from "fs"
 import os from "os"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { getGitDiff } from "../src/core/git"
+import { getGitDiff, parseCommits } from "../src/core/git"
 
 const setupTempGitRepository = () => {
     const tempDir = fs.mkdtempSync(join(os.tmpdir(), "git-test-"))
@@ -35,6 +35,8 @@ const setupTempGitRepository = () => {
     return tempDir
 }
 
+const shortHashRegex = /^[a-f0-9]{7}$/
+
 describe("git tests", () => {
     let tempRepoPath: string = ""
 
@@ -48,9 +50,8 @@ describe("git tests", () => {
     })
 
     describe("getGitDiff", () => {
-        const shortHashRegex = /^[a-f0-9]{7}$/
         it("should return the expected values", async () => {
-            const result = await getGitDiff()
+            const got = await getGitDiff()
 
             const want = [
                 {
@@ -79,11 +80,11 @@ describe("git tests", () => {
                 },
             ]
 
-            expect(want).toEqual(result)
+            expect(want).toEqual(got)
         })
 
         it("should return the expected values from range", async () => {
-            const result = await getGitDiff("HEAD~2")
+            const got = await getGitDiff("HEAD~2")
 
             const want = [
                 {
@@ -100,7 +101,50 @@ describe("git tests", () => {
                 },
             ]
 
-            expect(want).toEqual(result)
+            expect(want).toEqual(got)
+        })
+    })
+
+    describe("parseCommits", () => {
+        it("should return the expected values", async () => {
+            const commits = await getGitDiff()
+            const got = parseCommits(commits)
+
+            expect(got).toEqual([
+                {
+                    message: "fix!: THIS BREAKS EVERYTHING",
+                    shortHash: expect.stringMatching(shortHashRegex),
+                    author: { name: "Test User", email: "test@example.com" },
+                    body: "",
+                    authors: [{ name: "Test User", email: "test@example.com" }],
+                    description: "THIS BREAKS EVERYTHING",
+                    type: "fix",
+                    scope: "",
+                    isBreaking: true,
+                },
+                {
+                    message: "chore: update readme with body",
+                    shortHash: expect.stringMatching(shortHashRegex),
+                    author: { name: "Test User", email: "test@example.com" },
+                    body: "My body goes here.",
+                    authors: [{ name: "Test User", email: "test@example.com" }],
+                    description: "update readme with body",
+                    type: "chore",
+                    scope: "",
+                    isBreaking: false,
+                },
+                {
+                    message: "chore(scope): update readme",
+                    shortHash: expect.stringMatching(shortHashRegex),
+                    author: { name: "Test User", email: "test@example.com" },
+                    body: "",
+                    authors: [{ name: "Test User", email: "test@example.com" }],
+                    description: "update readme",
+                    type: "chore",
+                    scope: "scope",
+                    isBreaking: false,
+                },
+            ])
         })
     })
 })
