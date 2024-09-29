@@ -3,11 +3,7 @@
  * I only desconstructed to what I needed.
  */
 
-import { execSync } from "node:child_process"
-
-const run = (cmd: string, cwd?: string) => {
-    return execSync(cmd, { encoding: "utf8", cwd }).trim()
-}
+import { execa } from "execa"
 
 type GitCommitAuthor = {
     name: string
@@ -69,17 +65,15 @@ export const parseCommits = (commits: RawGitCommit[]): GitCommit[] => {
 }
 
 export const getGitDiff = async (
-    from: string | undefined,
+    from?: string,
     to = "HEAD",
 ): Promise<RawGitCommit[]> => {
+    const range = `${from ? `${from}...` : ""}${to}`
     // https://git-scm.com/docs/pretty-formats
-    const r = run(
-        `git --no-pager log "${
-            from ? `${from}...` : ""
-        }${to}" --pretty="---%n%s|%h|%an|%ae%n%b"`,
-    )
+    const { stdout } =
+        await execa`git --no-pager log ${range} --pretty=${"---%n%s|%h|%an|%ae%n%b"}`
 
-    return r
+    return stdout
         .split("---\n")
         .splice(1)
         .map((line) => {
@@ -91,7 +85,7 @@ export const getGitDiff = async (
                 message: message ?? "",
                 shortHash: shortHash ?? "",
                 author: { name: authorName ?? "", email: authorEmail ?? "" },
-                body: _body.join("\n"),
+                body: _body.join("\n").trim(),
             }
 
             return r
