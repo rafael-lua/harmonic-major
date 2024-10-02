@@ -1,23 +1,9 @@
-import { join } from "pathe"
 import { execaSync } from "execa"
 
 import fs from "fs"
-import os from "os"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { createReleaseTag, getGitDiff, parseCommits } from "../src/core/git"
-
-const setupTempGitRepository = async (fn: () => void | Promise<void>) => {
-    const tempDir = fs.mkdtempSync(join(os.tmpdir(), "git-test-"))
-    process.chdir(tempDir)
-
-    execaSync`git init`
-    execaSync`git config user.email ${"test@example.com"}`
-    execaSync`git config user.name ${"Test User"}`
-
-    await fn()
-
-    return tempDir
-}
+import { setupTempGitRepository } from "./testingUtils"
 
 const defaultGitCommands = () => {
     const README_FILE = "README.md"
