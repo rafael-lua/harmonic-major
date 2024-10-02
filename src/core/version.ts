@@ -9,7 +9,7 @@ export const bumpPackages = (commits: GitCommit[]) => {
         if (commit.isBreaking || acc === "major") return "major"
         if (type === "feat" || acc === "minor") return "minor"
 
-        // We weill consider chores as patches.
+        // We will consider chores as patches.
         return "patch"
     }, "patch" as VersionKey)
 
