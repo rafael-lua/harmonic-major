@@ -12,6 +12,7 @@ export const setupTempGitRepository = async (
     execaSync`git init`
     execaSync`git config user.email ${"test@example.com"}`
     execaSync`git config user.name ${"Test User"}`
+    execaSync`git branch -m main`
 
     await fn(tempDir)
 
