@@ -5,6 +5,7 @@ import {
     parseChangelog,
 } from "../src/core/changelog"
 import type { GitCommit } from "../src/core/git"
+import { shortHash } from "./testingUtils"
 
 describe("parseChangelog", () => {
     it("should parse changelog values into an array of releases", () => {
@@ -47,7 +48,6 @@ Header
     })
 })
 
-const shortHash = () => Math.random().toString(16).substring(2, 7)
 const makeCommit = (message: string): GitCommit => {
     return {
         description: message.split(":").pop() ?? "",
