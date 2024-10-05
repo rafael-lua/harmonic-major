@@ -4,7 +4,7 @@ import { tmpdir } from "os"
 import { join } from "pathe"
 
 export const setupTempGitRepository = async (
-    fn: (tempDir: string) => void | Promise<void>,
+    fn?: (tempDir: string) => void | Promise<void>,
 ) => {
     const tempDir = mkdtempSync(join(tmpdir(), "git-test-"))
     process.chdir(tempDir)
@@ -12,9 +12,10 @@ export const setupTempGitRepository = async (
     execaSync`git init`
     execaSync`git config user.email ${"test@example.com"}`
     execaSync`git config user.name ${"Test User"}`
+    execaSync`git remote add origin ${"https://github.com/testowner/testrepo.git"}`
     execaSync`git branch -m main`
 
-    await fn(tempDir)
+    if (fn) await fn(tempDir)
 
     return tempDir
 }
@@ -25,4 +26,23 @@ export const runCmd = async (v: string) => {
     return stdout
 }
 
+const currentWorkingDirectory = process.cwd()
+
+export const defaultRepositoryCommands = (tempDir: string) => {
+    const { stdout } =
+        execaSync`ls -a ${currentWorkingDirectory + "/tests/fixtures/monorepo"}`
+
+    stdout
+        .split("\n")
+        .filter((p) => p !== "." && p !== "..")
+        .forEach((path) => {
+            execaSync`cp -r ${currentWorkingDirectory + "/tests/fixtures/monorepo/" + path} ${tempDir}`
+        })
+
+    execaSync`yarn`
+    execaSync`yarn add bumpp@9.6.1`
+}
+
 export const shortHash = () => Math.random().toString(16).substring(2, 7)
+export const fullHash = () =>
+    Array.from({ length: 8 }, () => shortHash()).join("")
