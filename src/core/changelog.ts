@@ -1,9 +1,25 @@
-import type { GitCommit } from "./git"
+import {
+    getInitialCommit,
+    getLastTag,
+    getOwnerSlashRepo,
+    type GitCommit,
+} from "./git"
+import { resolve } from "pathe"
+import { readFile, writeFile } from "fs/promises"
+
+export const staticHeader =
+    "Changelogs are auto generated from commits using `harmonic-major` action."
 
 export const changelogParseRegex = /\s(?=## \[(?:\d{1,3}.){3})/u
 
 export const parseChangelog = (changelog: string) => {
-    return changelog.trim().split(changelogParseRegex)
+    if (changelog === "") return []
+
+    const [, rest] = changelog.split(`${staticHeader}\n\n`)
+
+    if (!rest) throw new Error("parseChangelog > No changelog found")
+
+    return rest.trim().split(changelogParseRegex)
 }
 
 type GenerateChangelogConfig = {
@@ -46,15 +62,33 @@ const getCommitLineBreak = (i: number, length: number) => {
     return isLast ? 2 : 1
 }
 
+const changelogsWithoutHeader = (changelog: string[]) => {
+    const [, ...rest] = changelog
+    return rest
+}
+
+export const makeDiffLink = (
+    ownerSlashRepo: string,
+    baseHash: string,
+    compareHash: string,
+) => `https://github.com/${ownerSlashRepo}/compare/${baseHash}...${compareHash}`
+
 export const generateChangelog = (
     currentChangelog: string[],
     newChangelog: GenerateChangelogConfig,
+    lastTagSha?: string,
 ) => {
-    const [header, ...releases] = currentChangelog
+    const releases = currentChangelog[0]?.startsWith("## ")
+        ? currentChangelog
+        : changelogsWithoutHeader(currentChangelog)
 
     let newRelease = ""
 
-    const newTagHeading = `[${newChangelog.tag}](${"..."}) (${newChangelog.date})`
+    const ownerSlashRepo = getOwnerSlashRepo()
+    const firstCommit = getInitialCommit()
+
+    // HEAD will be replaced with the bumped tag sha
+    const newTagHeading = `[${newChangelog.tag}](${makeDiffLink(ownerSlashRepo, lastTagSha ?? firstCommit, "HEAD")}) (${newChangelog.date})`
     newRelease += withLineBreak(makeH2(newTagHeading), 2)
 
     const groupedCommits: Record<
@@ -112,17 +146,65 @@ export const generateChangelog = (
     // Remove trailling line break
     newRelease = newRelease.slice(0, -1)
 
-    return { header, newRelease, releases: [...releases] }
+    return {
+        header: withLineBreak(staticHeader),
+        newRelease,
+        releases,
+    }
 }
 
-export const assembleChangelog = ({
-    header,
-    newRelease,
-    releases,
-}: {
-    header?: string
-    newRelease: string
-    releases: string[]
-}) => {
-    return [header, newRelease, ...releases].join("\n")
+export const assembleChangelog = async (
+    {
+        header,
+        newRelease,
+        releases,
+    }: {
+        header?: string
+        newRelease: string
+        releases: string[]
+    },
+    lastTag?: string,
+) => {
+    const [, newTag] =
+        (await getLastTag().catch((err) => {
+            console.error(
+                new Error("assembleChangelog > getLastTag() error", {
+                    cause: err,
+                }),
+            )
+            return undefined
+        })) ?? []
+
+    if (!newTag || lastTag === newTag) {
+        throw new Error("No new commits found")
+    }
+
+    const lastRelease = releases.shift()
+    if (lastRelease !== undefined && lastTag !== undefined) {
+        const updatedRelease = lastRelease.replace(/(?<=\.{3})HEAD/, lastTag)
+        releases.unshift(updatedRelease)
+    }
+
+    const updatedNewRelease = newRelease.replace(/(?<=\.{3})HEAD/, newTag)
+
+    return [header, updatedNewRelease, ...releases].join("\n")
+}
+
+export const readChangelog = async (changelogPath: string = "CHANGELOG.md") => {
+    const rootDir = process.cwd()
+    let changelogFile = await readFile(resolve(rootDir, changelogPath), {
+        encoding: "utf8",
+    }).catch(() => "")
+
+    return changelogFile
+}
+
+export const writeChangelog = async (
+    changelog: string,
+    changelogPath: string = "CHANGELOG.md",
+) => {
+    const rootDir = process.cwd()
+    await writeFile(resolve(rootDir, changelogPath), changelog, {
+        encoding: "utf8",
+    })
 }

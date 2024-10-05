@@ -2,6 +2,7 @@ import { execa, execaSync, parseCommandString } from "execa"
 import { mkdtempSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "pathe"
+import { getLastTag } from "../src/core/git"
 
 export const setupTempGitRepository = async (
     fn?: (tempDir: string) => void | Promise<void>,
@@ -46,3 +47,13 @@ export const defaultRepositoryCommands = (tempDir: string) => {
 export const shortHash = () => Math.random().toString(16).substring(2, 7)
 export const fullHash = () =>
     Array.from({ length: 8 }, () => shortHash()).join("")
+
+export const getLatestTag = async () => {
+    const [, newTag] =
+        (await getLastTag().catch((err) => {
+            console.error(new Error("getLastTag() error", { cause: err }))
+            return undefined
+        })) ?? []
+
+    return newTag
+}

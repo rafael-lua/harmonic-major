@@ -1,25 +1,12 @@
 import { rmSync } from "fs"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { setupTempGitRepository, shortHash } from "./testingUtils"
+import {
+    defaultRepositoryCommands,
+    setupTempGitRepository,
+    shortHash,
+} from "./testingUtils"
 import { execaSync } from "execa"
-import { bumpPackages } from "../src/core/version"
-
-const currentWorkingDirectory = process.cwd()
-
-const defaultRepositoryCommands = (tempDir: string) => {
-    const { stdout } =
-        execaSync`ls -a ${currentWorkingDirectory + "/tests/fixtures/monorepo"}`
-
-    stdout
-        .split("\n")
-        .filter((p) => p !== "." && p !== "..")
-        .forEach((path) => {
-            execaSync`cp -r ${currentWorkingDirectory + "/tests/fixtures/monorepo/" + path} ${tempDir}`
-        })
-
-    execaSync`yarn`
-    execaSync`yarn add bumpp@9.6.1`
-}
+import { bumpPackages, figureOutNextVersion } from "../src/core/version"
 
 const defaultAuthor = { name: "Test User", email: "test@example.com" }
 const testCommits = {
@@ -85,7 +72,11 @@ describe("bumpPackages", () => {
         "should bump packages (chores with patch)",
         { timeout: 15_000 },
         async () => {
-            bumpPackages([testCommits.v0_0_0])
+            const { versionKey, versionValue } = figureOutNextVersion(
+                [testCommits.v0_0_0],
+                "0.0.0",
+            )
+            bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "0.0.1"
 
@@ -131,7 +122,11 @@ describe("bumpPackages", () => {
         "should bump packages (fix with patch)",
         { timeout: 15_000 },
         async () => {
-            bumpPackages([testCommits.v0_0_0, testCommits.v0_0_1])
+            const { versionKey, versionValue } = figureOutNextVersion(
+                [testCommits.v0_0_0, testCommits.v0_0_1],
+                "0.0.1",
+            )
+            bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "0.0.2"
 
@@ -180,11 +175,11 @@ describe("bumpPackages", () => {
         "should bump packages (feat with minor)",
         { timeout: 15_000 },
         async () => {
-            bumpPackages([
-                testCommits.v0_0_0,
-                testCommits.v0_0_1,
-                testCommits.v0_1_0,
-            ])
+            const { versionKey, versionValue } = figureOutNextVersion(
+                [testCommits.v0_0_0, testCommits.v0_0_1, testCommits.v0_1_0],
+                "0.0.2",
+            )
+            bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "0.1.0"
 
@@ -234,12 +229,16 @@ describe("bumpPackages", () => {
         "should bump packages (feat with major)",
         { timeout: 15_000 },
         async () => {
-            bumpPackages([
-                testCommits.v0_0_0,
-                testCommits.v0_0_1,
-                testCommits.v0_1_0,
-                testCommits.v1_0_0,
-            ])
+            const { versionKey, versionValue } = figureOutNextVersion(
+                [
+                    testCommits.v0_0_0,
+                    testCommits.v0_0_1,
+                    testCommits.v0_1_0,
+                    testCommits.v1_0_0,
+                ],
+                "0.1.0",
+            )
+            bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "1.0.0"
 

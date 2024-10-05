@@ -3,8 +3,8 @@
  * I only desconstructed to what I needed.
  */
 
-import { execa } from "execa"
-import semver from "semver"
+import { execa, execaSync } from "execa"
+import { valid } from "semver"
 
 type GitCommitAuthor = {
     name: string
@@ -65,6 +65,57 @@ export const parseCommits = (commits: RawGitCommit[]): GitCommit[] => {
         .filter((v) => v !== null)
 }
 
+// git for-each-ref --format='%(refname:short) %(objectname)' --sort=-taggerdate --count=1 refs/tags
+// e.g: v0.0.0 sha...
+export const getLastTag = async () => {
+    const { stdout } = await execa("git", [
+        "for-each-ref",
+        "--format=%(refname:short) %(objectname)",
+        "--sort=-taggerdate",
+        "--count=1",
+        "refs/tags",
+    ])
+
+    const [tag, sha] = stdout.split(" ")
+
+    if (!tag || !sha) return undefined
+
+    return [tag, sha] as const
+}
+
+// git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags
+// e.g: v0.0.1\nv0.0.0
+export const getNthTag = async (n: number) => {
+    const { stdout: tagListString } = await execa("git", [
+        "for-each-ref",
+        "--sort=-taggerdate",
+        "--format=%(refname:short)",
+        "refs/tags",
+    ])
+
+    const tagList = tagListString.split("\n")
+    const nthTagName = tagList[n]
+
+    if (!nthTagName) throw new Error("getNthTag > No tag found")
+
+    const tagSha = await execa`git rev-parse ${nthTagName}`
+
+    return tagSha.stdout
+}
+
+export const getTagAmount = async () => {
+    const { stdout: tagListString } = await execa("git", [
+        "for-each-ref",
+        "--sort=-taggerdate",
+        "--format=%(refname:short)",
+        "refs/tags",
+    ])
+
+    const tagList = tagListString.split("\n")
+
+    return tagList.length
+}
+
 export const getGitDiff = async (
     from?: string,
     to = "HEAD",
@@ -93,14 +144,48 @@ export const getGitDiff = async (
         })
 }
 
-export const createReleaseTag = (
+export const createReleaseTag = async (
     version: string,
     message: string,
     hash: string = "HEAD",
 ) => {
-    const validVersion = semver.valid(version)
+    const validVersion = valid(version)
 
     if (validVersion === null) throw new Error("Invalid tag semver version")
 
     return execa("git", ["tag", "-a", `v${validVersion}`, "-m", message, hash])
+}
+
+export const getOwnerSlashRepo = () => {
+    try {
+        const remoteUrl = execaSync("git", [
+            "config",
+            "--get",
+            "remote.origin.url",
+        ]).stdout.trim()
+        const [, ownerSlashRepo] =
+            remoteUrl.match(/github\.com[:/](.+?)(\.git)?$/) ?? []
+
+        if (!ownerSlashRepo) throw new Error("Could not find remote origin url")
+
+        return ownerSlashRepo
+    } catch {
+        throw new Error(
+            "Could not find remote origin url in the current directory",
+        )
+    }
+}
+
+export const getInitialCommit = () => {
+    try {
+        const initialCommit = execaSync("git", [
+            "rev-list",
+            "--max-parents=0",
+            "HEAD",
+        ]).stdout.trim()
+
+        return initialCommit
+    } catch (error) {
+        throw new Error("Could not find any commits in the current directory")
+    }
 }

@@ -2,7 +2,13 @@ import { execaSync } from "execa"
 
 import fs from "fs"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
-import { createReleaseTag, getGitDiff, parseCommits } from "../src/core/git"
+import {
+    createReleaseTag,
+    getGitDiff,
+    getInitialCommit,
+    getOwnerSlashRepo,
+    parseCommits,
+} from "../src/core/git"
 import { setupTempGitRepository } from "./testingUtils"
 
 const defaultGitCommands = () => {
@@ -238,5 +244,49 @@ describe("diff tag tests", () => {
         ]
 
         expect(want).toEqual(got)
+    })
+})
+
+describe("utilities tests", () => {
+    let tempRepoPath: string = ""
+
+    beforeAll(async () => {
+        tempRepoPath = await setupTempGitRepository(defaultGitCommands)
+    })
+
+    afterAll(() => {
+        // Clean up the temporary directory
+        fs.rmSync(tempRepoPath, { recursive: true, force: true })
+    })
+
+    describe("getOwnerSlashRepo()", () => {
+        it("should extract owner and repo information", () => {
+            const ownerSlashRepo = getOwnerSlashRepo()
+            expect(ownerSlashRepo).toEqual("testowner/testrepo")
+        })
+
+        it("should throw if no remote origin is present", () => {
+            execaSync`git remote remove origin`
+            expect(() => getOwnerSlashRepo()).toThrowError(
+                "Could not find remote origin url in the current directory",
+            )
+        })
+    })
+
+    describe("getInitialCommit()", () => {
+        it("should extract owner and repo information", () => {
+            const firstCommit = getInitialCommit()
+            expect(firstCommit).toEqual(
+                execaSync`git rev-list ${"--max-parents=0"} HEAD`.stdout,
+            )
+        })
+
+        it("should throw if there is no commits yet", () => {
+            execaSync`rm -rf .git`
+            execaSync`git init`
+            expect(() => getInitialCommit()).toThrowError(
+                "Could not find any commits in the current directory",
+            )
+        })
     })
 })
