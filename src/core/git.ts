@@ -186,6 +186,8 @@ export const getInitialCommit = () => {
 
         return initialCommit
     } catch (error) {
-        throw new Error("Could not find any commits in the current directory")
+        throw new Error("Could not find any commits in the current directory", {
+            cause: error,
+        })
     }
 }

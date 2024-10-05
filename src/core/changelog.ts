@@ -1,11 +1,11 @@
+import { readFile, writeFile } from "fs/promises"
+import { resolve } from "pathe"
 import {
     getInitialCommit,
     getLastTag,
     getOwnerSlashRepo,
     type GitCommit,
 } from "./git"
-import { resolve } from "pathe"
-import { readFile, writeFile } from "fs/promises"
 
 export const staticHeader =
     "Changelogs are auto generated from commits using `harmonic-major` action."
@@ -192,7 +192,7 @@ export const assembleChangelog = async (
 
 export const readChangelog = async (changelogPath: string = "CHANGELOG.md") => {
     const rootDir = process.cwd()
-    let changelogFile = await readFile(resolve(rootDir, changelogPath), {
+    const changelogFile = await readFile(resolve(rootDir, changelogPath), {
         encoding: "utf8",
     }).catch(() => "")
 

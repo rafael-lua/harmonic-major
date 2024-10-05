@@ -1,16 +1,16 @@
+import { appendFileSync, rmSync, writeFileSync } from "fs"
 import { execaSync } from "execa"
+import { DateTime } from "luxon"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
+import { readChangelog } from "../src/core/changelog"
+import { getInitialCommit, getNthTag, getTagAmount } from "../src/core/git"
+import release from "../src/core/release"
+import { wait } from "../src/utils"
 import {
     defaultRepositoryCommands,
     getLatestTag,
     setupTempGitRepository,
 } from "./testingUtils"
-import { appendFileSync, rmSync, writeFileSync } from "fs"
-import release from "../src/core/release"
-import { readChangelog } from "../src/core/changelog"
-import { DateTime } from "luxon"
-import { getInitialCommit, getNthTag, getTagAmount } from "../src/core/git"
-import { wait } from "../src/utils"
 
 const makeInitialCommit = () => {
     const README_FILE = "README.md"

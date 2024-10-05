@@ -1,6 +1,6 @@
-import { execa, execaSync, parseCommandString } from "execa"
 import { mkdtempSync } from "fs"
 import { tmpdir } from "os"
+import { execa, execaSync, parseCommandString } from "execa"
 import { join } from "pathe"
 import { getLastTag } from "../src/core/git"
 

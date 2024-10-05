@@ -1,3 +1,6 @@
+import { appendFileSync, rmSync, writeFileSync } from "fs"
+import { appendFile, unlink } from "fs/promises"
+import { execaSync } from "execa"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import {
     assembleChangelog,
@@ -21,9 +24,6 @@ import {
     setupTempGitRepository,
     shortHash,
 } from "./testingUtils"
-import { appendFileSync, rmSync, writeFileSync } from "fs"
-import { execaSync } from "execa"
-import { appendFile, unlink } from "fs/promises"
 
 const README_FILE = "README.md"
 const defaultGitCommands = (tmpDir: string) => {

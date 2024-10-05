@@ -1,6 +1,6 @@
 import { execaSync } from "execa"
-import type { GitCommit } from "./git"
 import { inc } from "semver"
+import type { GitCommit } from "./git"
 
 type VersionKey = "major" | "minor" | "patch"
 

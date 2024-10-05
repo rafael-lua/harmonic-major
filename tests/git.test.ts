@@ -1,6 +1,6 @@
+import fs from "fs"
 import { execaSync } from "execa"
 
-import fs from "fs"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import {
     createReleaseTag,

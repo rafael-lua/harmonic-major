@@ -1,3 +1,4 @@
+import { DateTime } from "luxon"
 import {
     assembleChangelog,
     generateChangelog,
@@ -6,7 +7,6 @@ import {
     writeChangelog,
 } from "./changelog"
 import { createReleaseTag, getGitDiff, getLastTag, parseCommits } from "./git"
-import { DateTime } from "luxon"
 import { bumpPackages, figureOutNextVersion } from "./version"
 
 const now = DateTime.now()

@@ -1,12 +1,12 @@
 import { rmSync } from "fs"
+import { execaSync } from "execa"
 import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { bumpPackages, figureOutNextVersion } from "../src/core/version"
 import {
     defaultRepositoryCommands,
     setupTempGitRepository,
     shortHash,
 } from "./testingUtils"
-import { execaSync } from "execa"
-import { bumpPackages, figureOutNextVersion } from "../src/core/version"
 
 const defaultAuthor = { name: "Test User", email: "test@example.com" }
 const testCommits = {
