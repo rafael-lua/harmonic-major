@@ -3,6 +3,11 @@ description: "Create a release tag and update the release notes"
 outputs:
     release:
         description: "Version of the release tag"
+inputs:
+    github-token:
+        description: "GitHub Token to use for authentication (pushing to the repo)"
+        required: true
+        default: ${{ secrets.GITHUB_TOKEN }}
 runs:
     using: node20
     main: dist/index.mjs
