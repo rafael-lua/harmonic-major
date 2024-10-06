@@ -72824,6 +72824,7 @@ const run = async () => {
     if (newRelease) {
       coreExports.setOutput("release", newRelease);
       coreExports.info("New release created!");
+      coreExports.info(`release: v${newRelease}`);
       await execExports.exec("git", ["push", "--follow-tags"]);
       coreExports.info("New release pushed!");
     } else {
