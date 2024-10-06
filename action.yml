@@ -1,0 +1,8 @@
+name: "Harmonic Major"
+description: "Create a release tag and update the release notes"
+outputs:
+    release:
+        description: "Version of the release tag"
+runs:
+    using: node20
+    main: dist/index.mjs

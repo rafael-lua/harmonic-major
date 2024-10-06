@@ -1,3 +1,7 @@
+* text=auto eol=lf
+
+dist/** -diff linguist-generated=true
+
 /.yarn/**            linguist-vendored
 /.yarn/releases/*    binary
 /.yarn/plugins/**/*  binary

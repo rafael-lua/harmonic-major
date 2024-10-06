@@ -29,7 +29,7 @@ const release = async () => {
 
     if (!diff || diff.length === 0) {
         console.info("No diff found, skipping release")
-        return
+        return undefined
     }
 
     const commits = parseCommits(diff)
@@ -41,13 +41,14 @@ const release = async () => {
 
     const changelogFile = await readChangelog()
     const currentChangelog = parseChangelog(changelogFile)
+    const newTag = `v${versionValue}`
 
     const changelogs = generateChangelog(
         currentChangelog,
         {
             commits,
             date: now.toFormat("yyyy.M.d"),
-            tag: `v${versionValue}`,
+            tag: newTag,
         },
         lastTagSha,
     )
@@ -66,7 +67,7 @@ const release = async () => {
         return undefined
     })
 
-    console.info("Release complete")
+    return newTag
 }
 
 export default release
