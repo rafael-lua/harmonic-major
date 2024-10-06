@@ -1,6 +1,8 @@
 'use strict';
 
 const core = require('@actions/core');
+const exec = require('@actions/exec');
+const github = require('@actions/github');
 const luxon = require('luxon');
 const promises = require('fs/promises');
 const pathe = require('pathe');
@@ -317,10 +319,31 @@ const release = async () => {
 const run = async () => {
   try {
     core.info("Release action started...");
+    const githubToken = core.getInput("github-token");
     const newRelease = await release();
     if (newRelease) {
       core.setOutput("release", newRelease);
       core.info("New release created!");
+      await exec.exec("git", [
+        "config",
+        "--global",
+        "user.email",
+        '"github-actions[bot]@users.noreply.github.com"'
+      ]);
+      await exec.exec("git", [
+        "config",
+        "--global",
+        "user.name",
+        '"github-actions[bot]"'
+      ]);
+      await exec.exec("git", [
+        "remote",
+        "set-url",
+        "origin",
+        `https://x-access-token:${githubToken}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+      ]);
+      await exec.exec("git", ["push", "--follow-tags"]);
+      core.info("New release pushed!");
     } else {
       core.info("No new release created!");
     }
