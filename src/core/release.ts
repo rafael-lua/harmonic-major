@@ -62,7 +62,7 @@ const release = async () => {
 
     const changelog = await assembleChangelog(changelogs, lastTagSha)
 
-    await writeChangelog(changelog).catch((err) => {
+    await writeChangelog(changelog, undefined, versionValue).catch((err) => {
         console.error(new Error("writeChangelog() error", { cause: err }))
         return undefined
     })

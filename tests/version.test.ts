@@ -108,13 +108,6 @@ describe("bumpPackages", () => {
                 "version": "${expectedVersion}",
                 "private": true
             }"`)
-
-            const fixedHash = shortHash()
-            expect(
-                execaSync`git log --oneline`.stdout.replace(/^.{7}/, fixedHash),
-            ).toMatchInlineSnapshot(
-                `"${fixedHash} chore: release v${expectedVersion}"`,
-            )
         },
     )
 
@@ -158,16 +151,6 @@ describe("bumpPackages", () => {
                 "version": "${expectedVersion}",
                 "private": true
             }"`)
-
-            const fixedHash = shortHash()
-            expect(
-                execaSync`git log --oneline`.stdout.replaceAll(
-                    /^.{7}/gm,
-                    fixedHash,
-                ),
-            ).toMatchInlineSnapshot(`
-                "${fixedHash} chore: release v${expectedVersion}
-                ${fixedHash} chore: release v0.0.1"`)
         },
     )
 
@@ -211,17 +194,6 @@ describe("bumpPackages", () => {
                 "version": "${expectedVersion}",
                 "private": true
             }"`)
-
-            const fixedHash = shortHash()
-            expect(
-                execaSync`git log --oneline`.stdout.replaceAll(
-                    /^.{7}/gm,
-                    fixedHash,
-                ),
-            ).toMatchInlineSnapshot(`
-                "${fixedHash} chore: release v${expectedVersion}
-                ${fixedHash} chore: release v0.0.2
-                ${fixedHash} chore: release v0.0.1"`)
         },
     )
 
@@ -270,18 +242,6 @@ describe("bumpPackages", () => {
                 "version": "${expectedVersion}",
                 "private": true
             }"`)
-
-            const fixedHash = shortHash()
-            expect(
-                execaSync`git log --oneline`.stdout.replaceAll(
-                    /^.{7}/gm,
-                    fixedHash,
-                ),
-            ).toMatchInlineSnapshot(`
-                "${fixedHash} chore: release v${expectedVersion}
-                ${fixedHash} chore: release v0.1.0
-                ${fixedHash} chore: release v0.0.2
-                ${fixedHash} chore: release v0.0.1"`)
         },
     )
 })

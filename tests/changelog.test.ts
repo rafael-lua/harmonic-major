@@ -282,24 +282,43 @@ describe("writeChangelog", () => {
             })
 
             it("should write an new changelog", async () => {
-                await writeChangelog(changelogFixture)
+                await writeChangelog(changelogFixture, undefined, "0.0.0")
                 const got = await readChangelog()
 
                 expect(changelogFixture).toEqual(got)
+
+                const fixedHash = shortHash()
+                expect(
+                    execaSync`git log --oneline`.stdout.replace(
+                        /^.{7}/,
+                        fixedHash,
+                    ),
+                ).toMatchInlineSnapshot(`"${fixedHash} release 0.0.0"`)
             })
         })
 
         describe("with a existing changelog", () => {
             beforeEach(async () => {
                 await unlink("CHANGELOG.md").catch(() => {})
-                await writeChangelog("# Header")
+                await writeChangelog("# Header", undefined, "0.0.0")
             })
 
             it("should write the new changelog", async () => {
-                await writeChangelog(changelogFixture)
+                await writeChangelog(changelogFixture, undefined, "0.0.0")
                 const got = await readChangelog()
 
                 expect(changelogFixture).toEqual(got)
+
+                const fixedHash = shortHash()
+                expect(
+                    execaSync`git log --oneline`.stdout.replaceAll(
+                        /^.{7}/gm,
+                        fixedHash,
+                    ),
+                ).toMatchInlineSnapshot(`
+                    "${fixedHash} release 0.0.0
+                    ${fixedHash} release 0.0.0
+                    ${fixedHash} release 0.0.0"`)
             })
         })
     })

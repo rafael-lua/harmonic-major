@@ -40,6 +40,6 @@ export const bumpPackages = async ({
         tag: false,
         all: true,
         release: versionKey,
-        commit: true,
+        commit: false,
     })
 }

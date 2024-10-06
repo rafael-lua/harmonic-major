@@ -10,6 +10,7 @@ import {
     defaultRepositoryCommands,
     getLatestTag,
     setupTempGitRepository,
+    shortHash,
 } from "./testingUtils"
 
 const makeInitialCommit = () => {
@@ -40,6 +41,16 @@ const makeRandomCommit = (
 }
 
 const now = DateTime.now()
+
+const replaceShortHash = () => {
+    const fixedHash = shortHash()
+    const commit = execaSync`git log --oneline`.stdout
+        .replaceAll(/^.{7}/gm, fixedHash)
+        .split("\n")
+        .filter((item) => item.includes("release"))
+        .join("\n")
+    return [fixedHash, commit] as const
+}
 
 describe("release tests", () => {
     let tempRepoPath: string = ""
@@ -78,6 +89,10 @@ describe("release tests", () => {
 
             -   chore: initial commit
             "`)
+
+        const [fixedHash, commit] = replaceShortHash()
+        expect(commit).toMatchInlineSnapshot(`
+            "${fixedHash} release 0.0.1"`)
     })
 
     it("should create release v0.0.2", async () => {
@@ -107,6 +122,11 @@ describe("release tests", () => {
             ### 🧹 Chores
 
             -   chore: initial commit"`)
+
+        const [fixedHash, commit] = replaceShortHash()
+        expect(commit).toMatchInlineSnapshot(`
+                "${fixedHash} release 0.0.2
+                ${fixedHash} release 0.0.1"`)
     })
 
     it("should create release v0.0.3", async () => {
@@ -146,6 +166,12 @@ describe("release tests", () => {
             ### 🧹 Chores
 
             -   chore: initial commit"`)
+
+        const [fixedHash, commit] = replaceShortHash()
+        expect(commit).toMatchInlineSnapshot(`
+                "${fixedHash} release 0.0.3
+                ${fixedHash} release 0.0.2
+                ${fixedHash} release 0.0.1"`)
     })
 
     it("should create release v0.1.0", async () => {
@@ -201,6 +227,13 @@ describe("release tests", () => {
             ### 🧹 Chores
 
             -   chore: initial commit"`)
+
+        const [fixedHash, commit] = replaceShortHash()
+        expect(commit).toMatchInlineSnapshot(`
+                "${fixedHash} release 0.1.0
+                ${fixedHash} release 0.0.3
+                ${fixedHash} release 0.0.2
+                ${fixedHash} release 0.0.1"`)
     })
 
     it("should create release v1.0.0", async () => {
@@ -261,5 +294,13 @@ describe("release tests", () => {
             ### 🧹 Chores
 
             -   chore: initial commit"`)
+
+        const [fixedHash, commit] = replaceShortHash()
+        expect(commit).toMatchInlineSnapshot(`
+                "${fixedHash} release 1.0.0
+                ${fixedHash} release 0.1.0
+                ${fixedHash} release 0.0.3
+                ${fixedHash} release 0.0.2
+                ${fixedHash} release 0.0.1"`)
     })
 })

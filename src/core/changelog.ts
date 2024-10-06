@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "fs/promises"
+import { execaSync } from "execa"
 import { resolve } from "pathe"
 import {
     getInitialCommit,
@@ -202,9 +203,15 @@ export const readChangelog = async (changelogPath: string = "CHANGELOG.md") => {
 export const writeChangelog = async (
     changelog: string,
     changelogPath: string = "CHANGELOG.md",
+    newVersion: string,
 ) => {
     const rootDir = process.cwd()
     await writeFile(resolve(rootDir, changelogPath), changelog, {
         encoding: "utf8",
     })
+
+    const msg = "release " + newVersion
+
+    execaSync`git add .`
+    execaSync`git commit --all --message ${msg}`
 }
