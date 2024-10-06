@@ -1,5 +1,15 @@
 Changelogs are auto generated from commits using `harmonic-major` action.
 
+## [v1.0.9](https://github.com/rafael-lua/harmonic-major/compare/v1.0.8...v1.0.9) (2024.10.6)
+
+### 🐛 Fixes
+
+-   fix: fixes the release notes diff
+
+### 🧹 Chores
+
+-   chore: update dist
+
 ## [v1.0.8](https://github.com/rafael-lua/harmonic-major/compare/77e2c1b061a7d7aac763f1064b067593c905f654...HEAD) (2024.10.6)
 
 ### 🐛 Fixes
