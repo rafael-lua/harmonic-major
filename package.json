@@ -3,6 +3,8 @@
     "packageManager": "yarn@4.5.0",
     "version": "1.0.7",
     "type": "module",
+    "license": "MIT",
+    "author": "rafael-lua",
     "scripts": {
         "build": "unbuild 2>/dev/null",
         "test": "vitest",
