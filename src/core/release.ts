@@ -53,7 +53,7 @@ const release = async () => {
         lastTagSha,
     )
 
-    bumpPackages({ versionKey, versionValue })
+    await bumpPackages({ versionKey, versionValue })
 
     await createReleaseTag(versionValue, changelogs.newRelease).catch((err) => {
         console.error(new Error("createReleaseTag() error", { cause: err }))

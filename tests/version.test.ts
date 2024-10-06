@@ -76,7 +76,7 @@ describe("bumpPackages", () => {
                 [testCommits.v0_0_0],
                 "0.0.0",
             )
-            bumpPackages({ versionKey, versionValue })
+            await bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "0.0.1"
 
@@ -126,7 +126,7 @@ describe("bumpPackages", () => {
                 [testCommits.v0_0_0, testCommits.v0_0_1],
                 "0.0.1",
             )
-            bumpPackages({ versionKey, versionValue })
+            await bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "0.0.2"
 
@@ -179,7 +179,7 @@ describe("bumpPackages", () => {
                 [testCommits.v0_0_0, testCommits.v0_0_1, testCommits.v0_1_0],
                 "0.0.2",
             )
-            bumpPackages({ versionKey, versionValue })
+            await bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "0.1.0"
 
@@ -238,7 +238,7 @@ describe("bumpPackages", () => {
                 ],
                 "0.1.0",
             )
-            bumpPackages({ versionKey, versionValue })
+            await bumpPackages({ versionKey, versionValue })
 
             const expectedVersion = "1.0.0"
 

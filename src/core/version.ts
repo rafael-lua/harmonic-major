@@ -1,4 +1,4 @@
-import { execaSync } from "execa"
+import { versionBump } from "bumpp"
 import { inc } from "semver"
 import type { GitCommit } from "./git"
 
@@ -27,11 +27,19 @@ export const figureOutNextVersion = (
     }
 }
 
-export const bumpPackages = ({
+export const bumpPackages = async ({
     versionKey,
     versionValue,
 }: ReturnType<typeof figureOutNextVersion>) => {
     console.info(`Bumping packages to ${versionValue}`)
 
-    execaSync`node node_modules/bumpp/bin/bumpp.js ${versionKey} -r -y --no-push --no-tag --all`
+    await versionBump({
+        confirm: false,
+        recursive: true,
+        push: false,
+        tag: false,
+        all: true,
+        release: versionKey,
+        commit: true,
+    })
 }
