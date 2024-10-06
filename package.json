@@ -3,7 +3,7 @@
     "packageManager": "yarn@4.5.0",
     "type": "module",
     "scripts": {
-        "build": "unbuild || true",
+        "build": "unbuild > output.log 2>&1 || true",
         "test": "vitest",
         "format": "prettier . --write",
         "lint": "eslint --ext .js,.jsx,.mjs,.ts,.tsx -c .eslintrc.cjs --fix .",
