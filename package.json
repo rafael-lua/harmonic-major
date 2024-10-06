@@ -9,7 +9,7 @@
         "lint": "eslint --ext .js,.jsx,.mjs,.ts,.tsx -c .eslintrc.cjs --fix .",
         "all": "yarn lint && yarn format && yarn test",
         "release": "yarn dist && git tag -a $1 -m \"Release $1\" HEAD && git push --follow-tags",
-        "dist": "yarn build && git add . && git commit -m 'chore: update dist'"
+        "dist": "yarn build || true && git add . && git commit -m 'chore: update dist'"
     },
     "exports": {
         ".": {
