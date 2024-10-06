@@ -7,7 +7,8 @@
         "test": "vitest",
         "format": "prettier . --write",
         "lint": "eslint --ext .js,.jsx,.mjs,.ts,.tsx -c .eslintrc.cjs --fix .",
-        "all": "yarn lint && yarn format && yarn test"
+        "all": "yarn lint && yarn format && yarn test",
+        "release": "yarn build && git add . && git commit -m 'update dist' && git tag -a $1 -m \"Release $1\" HEAD && git push --follow-tags"
     },
     "exports": {
         ".": {
