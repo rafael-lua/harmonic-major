@@ -1,12 +1,7 @@
 import { readFile, writeFile } from "fs/promises"
 import { execaSync } from "execa"
 import { resolve } from "pathe"
-import {
-    getInitialCommit,
-    getLastTag,
-    getOwnerSlashRepo,
-    type GitCommit,
-} from "./git"
+import { getInitialCommit, getOwnerSlashRepo, type GitCommit } from "./git"
 
 export const staticHeader =
     "Changelogs are auto generated from commits using `harmonic-major` action."
@@ -88,7 +83,6 @@ export const generateChangelog = (
     const ownerSlashRepo = getOwnerSlashRepo()
     const firstCommit = getInitialCommit()
 
-    // HEAD will be replaced with the bumped tag sha
     const newTagHeading = `[${newChangelog.tag}](${makeDiffLink(ownerSlashRepo, lastTagSha ?? firstCommit, "HEAD")}) (${newChangelog.date})`
     newRelease += withLineBreak(makeH2(newTagHeading), 2)
 
@@ -166,29 +160,13 @@ export const assembleChangelog = async (
     },
     lastTag?: string,
 ) => {
-    const [, newTag] =
-        (await getLastTag().catch((err) => {
-            console.error(
-                new Error("assembleChangelog > getLastTag() error", {
-                    cause: err,
-                }),
-            )
-            return undefined
-        })) ?? []
-
-    if (!newTag || lastTag === newTag) {
-        throw new Error("No new commits found")
-    }
-
     const lastRelease = releases.shift()
     if (lastRelease !== undefined && lastTag !== undefined) {
         const updatedRelease = lastRelease.replace(/(?<=\.{3})HEAD/, lastTag)
         releases.unshift(updatedRelease)
     }
 
-    const updatedNewRelease = newRelease.replace(/(?<=\.{3})HEAD/, newTag)
-
-    return [header, updatedNewRelease, ...releases].join("\n")
+    return [header, newRelease, ...releases].join("\n")
 }
 
 export const readChangelog = async (changelogPath: string = "CHANGELOG.md") => {
@@ -205,6 +183,9 @@ export const writeChangelog = async (
     changelogPath: string = "CHANGELOG.md",
     newVersion: string,
 ) => {
+    // const latestCommit = execaSync`git rev-parse HEAD`.stdout
+    // changelog.replace(/(?<=\.{3})HEAD/, latestCommit)
+
     const rootDir = process.cwd()
     await writeFile(resolve(rootDir, changelogPath), changelog, {
         encoding: "utf8",

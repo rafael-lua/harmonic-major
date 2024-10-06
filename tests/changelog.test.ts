@@ -20,7 +20,6 @@ import {
 } from "../src/core/git"
 import {
     defaultRepositoryCommands,
-    getLatestTag,
     setupTempGitRepository,
     shortHash,
 } from "./testingUtils"
@@ -199,7 +198,6 @@ describe("assembleChangelog", () => {
         ]
 
         const firstCommit = "113df10b41c273f3acbc6ba0324de2b1e3a2acdf"
-        const headCommit = "01ea2b3e28e5fdca59bbbedd694a473246294acf"
 
         const changelog = generateChangelog(currentChangelog, {
             commits,
@@ -221,7 +219,6 @@ describe("assembleChangelog", () => {
         const want = wantRaw.default
             .trim()
             .replace(firstCommit, getInitialCommit())
-            .replace(headCommit, (await getLatestTag()) ?? "")
 
         expect(got).toMatchInlineSnapshot(`"${want}"`)
     })
