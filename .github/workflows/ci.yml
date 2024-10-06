@@ -1,4 +1,4 @@
-name: CI Harmonic Major
+name: Test and Dist
 
 on:
     push:
