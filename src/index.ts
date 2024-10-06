@@ -9,31 +9,31 @@ const run = async () => {
 
         const githubToken = getInput("github-token")
 
+        await exec("git", [
+            "config",
+            "--global",
+            "user.email",
+            '"github-actions[bot]@users.noreply.github.com"',
+        ])
+        await exec("git", [
+            "config",
+            "--global",
+            "user.name",
+            '"github-actions[bot]"',
+        ])
+
+        await exec("git", [
+            "remote",
+            "set-url",
+            "origin",
+            `https://x-access-token:${githubToken}@github.com/${context.repo.owner}/${context.repo.repo}.git`,
+        ])
+
         const newRelease = await release()
 
         if (newRelease) {
             setOutput("release", newRelease)
             info("New release created!")
-
-            await exec("git", [
-                "config",
-                "--global",
-                "user.email",
-                '"github-actions[bot]@users.noreply.github.com"',
-            ])
-            await exec("git", [
-                "config",
-                "--global",
-                "user.name",
-                '"github-actions[bot]"',
-            ])
-
-            await exec("git", [
-                "remote",
-                "set-url",
-                "origin",
-                `https://x-access-token:${githubToken}@github.com/${context.repo.owner}/${context.repo.repo}.git`,
-            ])
 
             await exec("git", ["push", "--follow-tags"])
 
