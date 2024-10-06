@@ -1,7 +1,7 @@
 {
     "name": "harmonic-major",
     "packageManager": "yarn@4.5.0",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "type": "module",
     "license": "MIT",
     "author": "rafael-lua",
