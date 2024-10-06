@@ -72,7 +72,7 @@ export const makeDiffLink = (
 export const generateChangelog = (
     currentChangelog: string[],
     newChangelog: GenerateChangelogConfig,
-    lastTagSha?: string,
+    lastTagToCompare?: string,
 ) => {
     const releases = currentChangelog[0]?.startsWith("## ")
         ? currentChangelog
@@ -83,7 +83,7 @@ export const generateChangelog = (
     const ownerSlashRepo = getOwnerSlashRepo()
     const firstCommit = getInitialCommit()
 
-    const newTagHeading = `[${newChangelog.tag}](${makeDiffLink(ownerSlashRepo, lastTagSha ?? firstCommit, "HEAD")}) (${newChangelog.date})`
+    const newTagHeading = `[${newChangelog.tag}](${makeDiffLink(ownerSlashRepo, lastTagToCompare ?? firstCommit, newChangelog.tag)}) (${newChangelog.date})`
     newRelease += withLineBreak(makeH2(newTagHeading), 2)
 
     const groupedCommits: Record<
@@ -148,26 +148,15 @@ export const generateChangelog = (
     }
 }
 
-export const assembleChangelog = async (
-    {
-        header,
-        newRelease,
-        releases,
-    }: {
-        header?: string
-        newRelease: string
-        releases: string[]
-    },
-    lastTag?: string,
-) => {
-    const lastRelease = releases.shift()
-    if (lastRelease !== undefined && lastTag !== undefined) {
-        const updatedRelease = lastRelease.replace(/(?<=\.{3})HEAD/, lastTag)
-        releases.unshift(updatedRelease)
-    }
-
-    return [header, newRelease, ...releases].join("\n")
-}
+export const assembleChangelog = async ({
+    header,
+    newRelease,
+    releases,
+}: {
+    header?: string
+    newRelease: string
+    releases: string[]
+}) => [header, newRelease, ...releases].join("\n")
 
 export const readChangelog = async (changelogPath: string = "CHANGELOG.md") => {
     const rootDir = process.cwd()
@@ -183,9 +172,6 @@ export const writeChangelog = async (
     changelogPath: string = "CHANGELOG.md",
     newVersion: string,
 ) => {
-    // const latestCommit = execaSync`git rev-parse HEAD`.stdout
-    // changelog.replace(/(?<=\.{3})HEAD/, latestCommit)
-
     const rootDir = process.cwd()
     await writeFile(resolve(rootDir, changelogPath), changelog, {
         encoding: "utf8",

@@ -14,7 +14,6 @@ import {
 import {
     createReleaseTag,
     getInitialCommit,
-    getNthTag,
     getOwnerSlashRepo,
     type GitCommit,
 } from "../src/core/git"
@@ -131,7 +130,7 @@ describe("generateChangelog", () => {
 
         const got = generateChangelog(currentChangelog, {
             commits,
-            tag: "1.0.0",
+            tag: "v1.0.0",
             date: "0000-00-00",
         })
 
@@ -140,7 +139,7 @@ describe("generateChangelog", () => {
 
         expect(got.header).toContain(header)
         expect(got.newRelease).toContain(
-            `## [1.0.0](${makeDiffLink(ownerSlashRepo, firstCommit, "HEAD")}) (0000-00-00)`,
+            `## [v1.0.0](${makeDiffLink(ownerSlashRepo, firstCommit, "v1.0.0")}) (0000-00-00)`,
         )
         expect(got.releases).toHaveLength(1)
         expect(releases.join("\n").trim()).toEqual(got.releases[0])
@@ -197,28 +196,26 @@ describe("assembleChangelog", () => {
             makeCommit("test(scope): hopefully doesnt break"),
         ]
 
-        const firstCommit = "113df10b41c273f3acbc6ba0324de2b1e3a2acdf"
-
-        const changelog = generateChangelog(currentChangelog, {
-            commits,
-            tag: "1.0.0",
-            date: "0000-00-00",
-        })
+        const changelog = generateChangelog(
+            currentChangelog,
+            {
+                commits,
+                tag: "v1.0.0",
+                date: "0000-00-00",
+            },
+            "v0.0.1",
+        )
 
         appendFileSync(README_FILE, "# Test")
         execaSync`git add ${README_FILE}`
         execaSync`git commit -m ${"fix: update changelog"}`
         await createReleaseTag("1.0.0", changelog.newRelease)
 
-        const got = await assembleChangelog(
-            { ...changelog },
-            await getNthTag(1),
-        )
+        const got = await assembleChangelog({ ...changelog })
 
         const wantRaw = await import("./fixtures/changelog-two-releases.md?raw")
-        const want = wantRaw.default
-            .trim()
-            .replace(firstCommit, getInitialCommit())
+        const want = wantRaw.default.trim()
+        // .replace(firstCommit, getInitialCommit())
 
         expect(got).toMatchInlineSnapshot(`"${want}"`)
     })

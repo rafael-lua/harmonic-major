@@ -3,12 +3,11 @@ import { execaSync } from "execa"
 import { DateTime } from "luxon"
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest"
 import { readChangelog } from "../src/core/changelog"
-import { getInitialCommit, getNthTag, getTagAmount } from "../src/core/git"
+import { getTagAmount } from "../src/core/git"
 import release from "../src/core/release"
 import { wait } from "../src/utils"
 import {
     defaultRepositoryCommands,
-    getLatestTag,
     setupTempGitRepository,
     shortHash,
 } from "./testingUtils"
@@ -81,7 +80,7 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
 
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...HEAD) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/v0.0.0...${expectedVersion}) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
@@ -96,8 +95,6 @@ describe("release tests", () => {
     it("should create release v0.0.2", async () => {
         makeRandomCommit("patch", "chore")
 
-        const lastTag = await getLatestTag()
-
         await release()
         const got = await readChangelog()
 
@@ -107,13 +104,13 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/v0.0.1...${expectedVersion}) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
             -   chore: patch commit
 
-            ## [v0.0.1](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...${lastTag}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.1](https://github.com/testowner/testrepo/compare/v0.0.0...v0.0.1) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
@@ -129,12 +126,8 @@ describe("release tests", () => {
         makeRandomCommit("patch", "fix")
         makeRandomCommit("patch", "fix")
 
-        const lastTag = await getLatestTag()
-
         await release()
         const got = await readChangelog()
-
-        const tag002 = await getNthTag(2)
 
         const expectedVersion = "v0.0.3"
 
@@ -142,20 +135,20 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/v0.0.2...${expectedVersion}) (${now.toFormat("yyyy.M.d")})
 
             ### 🐛 Fixes
 
             -   fix: patch commit
             -   fix: patch commit
 
-            ## [v0.0.2](https://github.com/testowner/testrepo/compare/${tag002}...${lastTag}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.2](https://github.com/testowner/testrepo/compare/v0.0.1...v0.0.2) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
             -   chore: patch commit
 
-            ## [v0.0.1](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...${tag002}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.1](https://github.com/testowner/testrepo/compare/v0.0.0...v0.0.1) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
@@ -173,13 +166,8 @@ describe("release tests", () => {
         makeRandomCommit("patch", "test", "scope1")
         makeRandomCommit("minor", "feat", "scope2")
 
-        const lastTag = await getLatestTag()
-
         await release()
         const got = await readChangelog()
-
-        const tag002 = await getNthTag(3)
-        const tag003 = await getNthTag(2)
 
         const expectedVersion = "v0.1.0"
 
@@ -187,7 +175,7 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/v0.0.3...${expectedVersion}) (${now.toFormat("yyyy.M.d")})
 
             ### ✨ Features
 
@@ -201,20 +189,20 @@ describe("release tests", () => {
             
             -   test(scope1): patch commit
 
-            ## [v0.0.3](https://github.com/testowner/testrepo/compare/${tag003}...${lastTag}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.3](https://github.com/testowner/testrepo/compare/v0.0.2...v0.0.3) (${now.toFormat("yyyy.M.d")})
 
             ### 🐛 Fixes
 
             -   fix: patch commit
             -   fix: patch commit
 
-            ## [v0.0.2](https://github.com/testowner/testrepo/compare/${tag002}...${tag003}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.2](https://github.com/testowner/testrepo/compare/v0.0.1...v0.0.2) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
             -   chore: patch commit
 
-            ## [v0.0.1](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...${tag002}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.1](https://github.com/testowner/testrepo/compare/v0.0.0...v0.0.1) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
@@ -231,14 +219,8 @@ describe("release tests", () => {
     it("should create release v1.0.0", async () => {
         makeRandomCommit("major", "feat", "scope", true)
 
-        const lastTag = await getLatestTag()
-
         await release()
         const got = await readChangelog()
-
-        const tag002 = await getNthTag(4)
-        const tag003 = await getNthTag(3)
-        const tag010 = await getNthTag(2)
 
         const expectedVersion = "v1.0.0"
 
@@ -246,13 +228,13 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/v0.1.0...${expectedVersion}) (${now.toFormat("yyyy.M.d")})
 
             ### ✨ Features
 
             -   ⚠️ feat(scope)!: major commit
 
-            ## [v0.1.0](https://github.com/testowner/testrepo/compare/${tag010}...${lastTag}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.1.0](https://github.com/testowner/testrepo/compare/v0.0.3...v0.1.0) (${now.toFormat("yyyy.M.d")})
 
             ### ✨ Features
 
@@ -266,20 +248,20 @@ describe("release tests", () => {
             
             -   test(scope1): patch commit
 
-            ## [v0.0.3](https://github.com/testowner/testrepo/compare/${tag003}...${tag010}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.3](https://github.com/testowner/testrepo/compare/v0.0.2...v0.0.3) (${now.toFormat("yyyy.M.d")})
 
             ### 🐛 Fixes
 
             -   fix: patch commit
             -   fix: patch commit
 
-            ## [v0.0.2](https://github.com/testowner/testrepo/compare/${tag002}...${tag003}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.2](https://github.com/testowner/testrepo/compare/v0.0.1...v0.0.2) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
             -   chore: patch commit
 
-            ## [v0.0.1](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...${tag002}) (${now.toFormat("yyyy.M.d")})
+            ## [v0.0.1](https://github.com/testowner/testrepo/compare/v0.0.0...v0.0.1) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
