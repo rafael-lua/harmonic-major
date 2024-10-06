@@ -14,6 +14,10 @@ on:
 permissions:
     contents: write # This is required to create a release
 
+concurrency:
+    group: "test-and-dist"
+    cancel-in-progress: true
+
 jobs:
     test:
         runs-on: ubuntu-latest
