@@ -51600,12 +51600,12 @@ const changelogsWithoutHeader = (changelog) => {
   return rest;
 };
 const makeDiffLink = (ownerSlashRepo, baseHash, compareHash) => `https://github.com/${ownerSlashRepo}/compare/${baseHash}...${compareHash}`;
-const generateChangelog = (currentChangelog, newChangelog, lastTagSha) => {
+const generateChangelog = (currentChangelog, newChangelog, lastTagToCompare) => {
   const releases = currentChangelog[0]?.startsWith("## ") ? currentChangelog : changelogsWithoutHeader(currentChangelog);
   let newRelease = "";
   const ownerSlashRepo = getOwnerSlashRepo();
   const firstCommit = getInitialCommit();
-  const newTagHeading = `[${newChangelog.tag}](${makeDiffLink(ownerSlashRepo, lastTagSha ?? firstCommit, "HEAD")}) (${newChangelog.date})`;
+  const newTagHeading = `[${newChangelog.tag}](${makeDiffLink(ownerSlashRepo, lastTagToCompare ?? firstCommit, newChangelog.tag)}) (${newChangelog.date})`;
   newRelease += withLineBreak(makeH2(newTagHeading), 2);
   const groupedCommits = {
     feat: [],
@@ -51658,14 +51658,7 @@ const assembleChangelog = async ({
   header,
   newRelease,
   releases
-}, lastTag) => {
-  const lastRelease = releases.shift();
-  if (lastRelease !== void 0 && lastTag !== void 0) {
-    const updatedRelease = lastRelease.replace(/(?<=\.{3})HEAD/, lastTag);
-    releases.unshift(updatedRelease);
-  }
-  return [header, newRelease, ...releases].join("\n");
-};
+}) => [header, newRelease, ...releases].join("\n");
 const readChangelog = async (changelogPath = "CHANGELOG.md") => {
   const rootDir = process.cwd();
   const changelogFile = await readFile(resolve(rootDir, changelogPath), {
@@ -72694,7 +72687,7 @@ const release = async () => {
   });
   if (!lastTag)
     console.info("No recent tag found, will consider from the beginning");
-  const [lastTagVersion, lastTagSha] = lastTag ?? ["0.0.0", void 0];
+  const [lastTagVersion, lastTagSha] = lastTag ?? ["v0.0.0", void 0];
   const diff = await getGitDiff(lastTagSha).catch((err) => {
     console.error(new Error("getGitDiff() error", { cause: err }));
     return void 0;
@@ -72718,10 +72711,10 @@ const release = async () => {
       date: now.toFormat("yyyy.M.d"),
       tag: newTag
     },
-    lastTagSha
+    lastTagVersion
   );
   await bumpPackages({ versionKey, versionValue });
-  const changelog = await assembleChangelog(changelogs, lastTagSha);
+  const changelog = await assembleChangelog(changelogs);
   await writeChangelog(changelog, void 0, versionValue).catch((err) => {
     console.error(new Error("writeChangelog() error", { cause: err }));
     return void 0;

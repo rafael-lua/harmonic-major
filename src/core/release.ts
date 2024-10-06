@@ -20,7 +20,7 @@ const release = async () => {
     if (!lastTag)
         console.info("No recent tag found, will consider from the beginning")
 
-    const [lastTagVersion, lastTagSha] = lastTag ?? ["0.0.0", undefined]
+    const [lastTagVersion, lastTagSha] = lastTag ?? ["v0.0.0", undefined]
 
     const diff = await getGitDiff(lastTagSha).catch((err) => {
         console.error(new Error("getGitDiff() error", { cause: err }))
@@ -50,12 +50,12 @@ const release = async () => {
             date: now.toFormat("yyyy.M.d"),
             tag: newTag,
         },
-        lastTagSha,
+        lastTagVersion,
     )
 
     await bumpPackages({ versionKey, versionValue })
 
-    const changelog = await assembleChangelog(changelogs, lastTagSha)
+    const changelog = await assembleChangelog(changelogs)
 
     await writeChangelog(changelog, undefined, versionValue).catch((err) => {
         console.error(new Error("writeChangelog() error", { cause: err }))

@@ -1,6 +1,6 @@
 Changelogs are auto generated from commits using `harmonic-major` action.
 
-## [0.0.0-beta.1](diff) (0000-00-00)
+## [v0.0.1](https://github.com/testowner/testrepo/compare/{firstCommitSha}...v0.0.1) (0000-00-00)
 
 ### ✨ Features
 
