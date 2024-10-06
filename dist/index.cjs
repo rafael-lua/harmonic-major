@@ -51712,24 +51712,12 @@ const assembleChangelog = async ({
   newRelease,
   releases
 }, lastTag) => {
-  const [, newTag] = await getLastTag().catch((err) => {
-    console.error(
-      new Error("assembleChangelog > getLastTag() error", {
-        cause: err
-      })
-    );
-    return void 0;
-  }) ?? [];
-  if (!newTag || lastTag === newTag) {
-    throw new Error("No new commits found");
-  }
   const lastRelease = releases.shift();
   if (lastRelease !== void 0 && lastTag !== void 0) {
     const updatedRelease = lastRelease.replace(/(?<=\.{3})HEAD/, lastTag);
     releases.unshift(updatedRelease);
   }
-  const updatedNewRelease = newRelease.replace(/(?<=\.{3})HEAD/, newTag);
-  return [header, updatedNewRelease, ...releases].join("\n");
+  return [header, newRelease, ...releases].join("\n");
 };
 const readChangelog = async (changelogPath = "CHANGELOG.md") => {
   const rootDir = process.cwd();
@@ -72786,13 +72774,13 @@ const release = async () => {
     lastTagSha
   );
   await bumpPackages({ versionKey, versionValue });
-  await createReleaseTag(versionValue, changelogs.newRelease).catch((err) => {
-    console.error(new Error("createReleaseTag() error", { cause: err }));
-    return void 0;
-  });
   const changelog = await assembleChangelog(changelogs, lastTagSha);
   await writeChangelog(changelog, void 0, versionValue).catch((err) => {
     console.error(new Error("writeChangelog() error", { cause: err }));
+    return void 0;
+  });
+  await createReleaseTag(versionValue, changelogs.newRelease).catch((err) => {
+    console.error(new Error("createReleaseTag() error", { cause: err }));
     return void 0;
   });
   return newTag;

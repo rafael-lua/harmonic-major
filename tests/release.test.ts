@@ -75,15 +75,13 @@ describe("release tests", () => {
         await release()
         const got = await readChangelog()
 
-        const newTag = await getLatestTag()
-
         const expectedVersion = "v0.0.1"
 
         expect(await getTagAmount()).toBe(1)
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
 
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...${newTag}) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${getInitialCommit()}...HEAD) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
@@ -103,15 +101,13 @@ describe("release tests", () => {
         await release()
         const got = await readChangelog()
 
-        const newTag = await getLatestTag()
-
         const expectedVersion = "v0.0.2"
 
         expect(await getTagAmount()).toBe(2)
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...${newTag}) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
 
             ### 🧹 Chores
 
@@ -138,8 +134,6 @@ describe("release tests", () => {
         await release()
         const got = await readChangelog()
 
-        const newTag = await getLatestTag()
-
         const tag002 = await getNthTag(2)
 
         const expectedVersion = "v0.0.3"
@@ -148,7 +142,7 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...${newTag}) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
 
             ### 🐛 Fixes
 
@@ -184,8 +178,6 @@ describe("release tests", () => {
         await release()
         const got = await readChangelog()
 
-        const newTag = await getLatestTag()
-
         const tag002 = await getNthTag(3)
         const tag003 = await getNthTag(2)
 
@@ -195,7 +187,7 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...${newTag}) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
 
             ### ✨ Features
 
@@ -244,8 +236,6 @@ describe("release tests", () => {
         await release()
         const got = await readChangelog()
 
-        const newTag = await getLatestTag()
-
         const tag002 = await getNthTag(4)
         const tag003 = await getNthTag(3)
         const tag010 = await getNthTag(2)
@@ -256,7 +246,7 @@ describe("release tests", () => {
         expect(got).toMatchInlineSnapshot(`
             "Changelogs are auto generated from commits using \`harmonic-major\` action.
             
-            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...${newTag}) (${now.toFormat("yyyy.M.d")})
+            ## [${expectedVersion}](https://github.com/testowner/testrepo/compare/${lastTag}...HEAD) (${now.toFormat("yyyy.M.d")})
 
             ### ✨ Features
 

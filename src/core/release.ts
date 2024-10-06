@@ -55,15 +55,15 @@ const release = async () => {
 
     await bumpPackages({ versionKey, versionValue })
 
-    await createReleaseTag(versionValue, changelogs.newRelease).catch((err) => {
-        console.error(new Error("createReleaseTag() error", { cause: err }))
-        return undefined
-    })
-
     const changelog = await assembleChangelog(changelogs, lastTagSha)
 
     await writeChangelog(changelog, undefined, versionValue).catch((err) => {
         console.error(new Error("writeChangelog() error", { cause: err }))
+        return undefined
+    })
+
+    await createReleaseTag(versionValue, changelogs.newRelease).catch((err) => {
+        console.error(new Error("createReleaseTag() error", { cause: err }))
         return undefined
     })
 
