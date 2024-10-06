@@ -80,7 +80,6 @@ Thumbs.db
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # TypeScript build output
 *.tsbuildinfo
