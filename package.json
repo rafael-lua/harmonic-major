@@ -8,7 +8,8 @@
         "format": "prettier . --write",
         "lint": "eslint --ext .js,.jsx,.mjs,.ts,.tsx -c .eslintrc.cjs --fix .",
         "all": "yarn lint && yarn format && yarn test",
-        "release": "yarn build || true && git add . && git commit -m 'update dist' && git tag -a $1 -m \"Release $1\" HEAD && git push --follow-tags"
+        "release": "yarn dist && git tag -a $1 -m \"Release $1\" HEAD && git push --follow-tags",
+        "dist": "yarn build || true && git add . && git commit -m 'chore: update dist'"
     },
     "exports": {
         ".": {
