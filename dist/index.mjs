@@ -72746,28 +72746,28 @@ const run = async () => {
   try {
     coreExports.info("Release action started...");
     const githubToken = coreExports.getInput("github-token");
+    await execExports.exec("git", [
+      "config",
+      "--global",
+      "user.email",
+      '"github-actions[bot]@users.noreply.github.com"'
+    ]);
+    await execExports.exec("git", [
+      "config",
+      "--global",
+      "user.name",
+      '"github-actions[bot]"'
+    ]);
+    await execExports.exec("git", [
+      "remote",
+      "set-url",
+      "origin",
+      `https://x-access-token:${githubToken}@github.com/${githubExports.context.repo.owner}/${githubExports.context.repo.repo}.git`
+    ]);
     const newRelease = await release();
     if (newRelease) {
       coreExports.setOutput("release", newRelease);
       coreExports.info("New release created!");
-      await execExports.exec("git", [
-        "config",
-        "--global",
-        "user.email",
-        '"github-actions[bot]@users.noreply.github.com"'
-      ]);
-      await execExports.exec("git", [
-        "config",
-        "--global",
-        "user.name",
-        '"github-actions[bot]"'
-      ]);
-      await execExports.exec("git", [
-        "remote",
-        "set-url",
-        "origin",
-        `https://x-access-token:${githubToken}@github.com/${githubExports.context.repo.owner}/${githubExports.context.repo.repo}.git`
-      ]);
       await execExports.exec("git", ["push", "--follow-tags"]);
       coreExports.info("New release pushed!");
     } else {
