@@ -7,9 +7,6 @@ on:
             - main
         tags:
             - "v*"
-    pull_request:
-        branches:
-            - main
 
 permissions:
     contents: write # This is required to create a release
