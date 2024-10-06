@@ -1,7 +1,7 @@
 {
     "name": "harmonic-major",
     "packageManager": "yarn@4.5.0",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "type": "module",
     "scripts": {
         "build": "unbuild 2>/dev/null",
