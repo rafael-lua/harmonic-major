@@ -34,6 +34,7 @@ const run = async () => {
         if (newRelease) {
             setOutput("release", newRelease)
             info("New release created!")
+            info(`release: v${newRelease}`)
 
             await exec("git", ["push", "--follow-tags"])
 

@@ -1,0 +1,23 @@
+name: Harmonic Major Release
+
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: write # This is required to create a release
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Fetch all history for generating new release notes
+
+            - name: Run custom action
+              uses: rafael-lua/harmonic-major@main
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}

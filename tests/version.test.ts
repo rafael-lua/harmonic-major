@@ -84,6 +84,7 @@ describe("bumpPackages", () => {
             "{
                 "name": "test-package",
                 "version": "${expectedVersion}",
+                "packageManager": "yarn@4.5.0",
                 "private": true,
                 "workspaces": [
                     "packages/*"
@@ -127,6 +128,7 @@ describe("bumpPackages", () => {
             "{
                 "name": "test-package",
                 "version": "${expectedVersion}",
+                "packageManager": "yarn@4.5.0",
                 "private": true,
                 "workspaces": [
                     "packages/*"
@@ -170,6 +172,7 @@ describe("bumpPackages", () => {
             "{
                 "name": "test-package",
                 "version": "${expectedVersion}",
+                "packageManager": "yarn@4.5.0",
                 "private": true,
                 "workspaces": [
                     "packages/*"
@@ -218,6 +221,7 @@ describe("bumpPackages", () => {
             "{
                 "name": "test-package",
                 "version": "${expectedVersion}",
+                "packageManager": "yarn@4.5.0",
                 "private": true,
                 "workspaces": [
                     "packages/*"
