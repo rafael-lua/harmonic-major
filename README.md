@@ -4,6 +4,7 @@ My own action to generate changelogs from commits with support for monorepos.
 
 ## Todo
 
+-   [ ] Order scopes
 -   [ ] Undo changes on errors
--   [ ] Add prerelease
+-   [ ] Support prereleases
 -   [ ] Improve logs and use `@actions/core` instead of `console`
