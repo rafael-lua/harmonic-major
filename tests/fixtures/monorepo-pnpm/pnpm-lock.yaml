@@ -1,0 +1,12 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+  packages/package1:
+    specifiers: {}
+
+  packages/package2:
+    specifiers: {}
