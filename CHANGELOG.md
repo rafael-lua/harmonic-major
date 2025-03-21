@@ -1,5 +1,17 @@
 Changelogs are auto generated from commits using `harmonic-major` action.
 
+## [v1.1.0](https://github.com/rafael-lua/harmonic-major/compare/v1.0.10...v1.1.0) (2025.3.21)
+
+### ✨ Features
+
+-   feat: add pnpm tests and adaptations
+-   feat: init claude
+
+### 🧹 Chores
+
+-   ci: update CI to support pnpm commands for testing
+-   chore: update readme
+
 ## [v1.0.10](https://github.com/rafael-lua/harmonic-major/compare/v1.0.9...v1.0.10) (2024.10.8)
 
 ### 🧹 Chores
