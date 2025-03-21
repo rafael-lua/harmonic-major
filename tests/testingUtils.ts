@@ -29,19 +29,22 @@ export const runCmd = async (v: string) => {
 
 const currentWorkingDirectory = process.cwd()
 
-export const defaultRepositoryCommands = (tempDir: string) => {
+export const defaultRepositoryCommands = (tempDir: string, usePnpm = false) => {
+    const fixtureDir = usePnpm ? "monorepo-pnpm" : "monorepo"
+    const packageManager = usePnpm ? "pnpm" : "yarn"
+
     const { stdout } =
-        execaSync`ls -a ${currentWorkingDirectory + "/tests/fixtures/monorepo"}`
+        execaSync`ls -a ${currentWorkingDirectory + "/tests/fixtures/" + fixtureDir}`
 
     stdout
         .split("\n")
         .filter((p) => p !== "." && p !== "..")
         .forEach((path) => {
-            execaSync`cp -r ${currentWorkingDirectory + "/tests/fixtures/monorepo/" + path} ${tempDir}`
+            execaSync`cp -r ${currentWorkingDirectory + "/tests/fixtures/" + fixtureDir + "/" + path} ${tempDir}`
         })
 
-    execaSync`yarn`
-    execaSync`yarn add bumpp@9.6.1`
+    execaSync`${packageManager} install`
+    execaSync`${packageManager} add bumpp@9.6.1`
 }
 
 export const shortHash = () => Math.random().toString(16).substring(2, 7)
